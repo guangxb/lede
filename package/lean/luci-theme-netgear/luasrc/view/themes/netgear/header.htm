@@ -63,7 +63,13 @@
 		end
 		return pcdata(url)
 	end
-
+	local function nodeurlfix(prefix, name, query)
+		local u = url(prefix, name)
+		if query then
+			u = u .. http.build_querystring(query)
+		end
+		return pcdata(u)
+	end
 	local function subtree(prefix, node, level)
 		if not level then
 			level = 1
@@ -175,7 +181,7 @@
 			end
 			%>
 			<% if ucichanges > 0 then %>
-			<a class="label notice" href="<%=controller%>/<%=category%>/uci/changes?redir=<%=http.urlencode(http.formvalue("redir") or REQUEST_URI)%>"><span class="mobile-hide"><%:Unsaved Changes%>: </span><%=ucichanges%></a>
+			<a class="label notice" href="<%=url(category, 'uci/changes')%>?redir=<%=http.urlencode(http.formvalue('redir') or table.concat(disp.context.request, "/"))%>"><span class="mobile-hide"><%=translate('Unsaved Changes')%>: </span><%=ucichanges%></a>
 			<% end %>
 			<span id="xhr_poll_status" style="display:none" onclick="XHR.running() ? XHR.halt() : XHR.run()">
 				<span class="label success" id="xhr_poll_status_on"><span class="mobile-hide"><%:Auto Refresh%> </span><%:on%></span>
@@ -207,7 +213,7 @@
 				 local href  = controller .. "/" .. prefix .. r ..
 				 (nnode.query and http.build_querystring(nnode.query) or "")
 				 %>
-				 <li><a data-title="<%=pcdata(striptags(nnode.title))%>" href="<%=pcdata(href)%>"><%=pcdata(striptags(translate(nnode.title)))%></a></li>
+				 <li><a data-title="<%=pcdata(striptags(nnode.title))%>" href="<%=nodeurlfix(prefix, r, nnode.query)%>"><%=pcdata(striptags(translate(nnode.title)))%></a></li>
 				 <%-
 				 end
 				 %>
@@ -229,11 +235,11 @@
 			 %>
 			 <li class="slide">
 				 <a class="menu" data-title="<%=pcdata(striptags(nnode.title))%>" href="#"><%=pcdata(striptags(translate(nnode.title)))%></a>
-				 <%- submenu("/" .. category .. "/" .. r .. "/", nnode) %>
+				 <%- submenu(category .. "/" .. r, nnode) %>
 			 </li>
 			 <%          else %>
 			 <li class="slide">
-				 <a class="menu2" data-title="<%=pcdata(striptags(nnode.title))%>" href="<%=pcdata(href)%>"><%=pcdata(striptags(translate(nnode.title)))%></a>
+				 <a class="menu2" data-title="<%=pcdata(striptags(nnode.title))%>" href="<%=nodeurlfix(category, r, nnode.query)%>"><%=pcdata(striptags(translate(nnode.title)))%></a>
 			 </li>
 			 <%
 			 end
